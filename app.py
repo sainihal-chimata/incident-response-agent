@@ -1,0 +1,24 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import Optional
+from environment import IncidentEnv, Observation
+app=FastAPI()
+env=IncidentEnv()
+class ResetRequest(BaseModel):
+    task:str="easy"
+class StepRequest(BaseModel):
+    action:str
+@app.get("/health")
+def health():
+    return {"status":"ok"}
+@app.post("/reset")
+def reset(req:ResetRequest):
+    obs=env.reset(req.task)
+    return {"observation":obs.model_dump(), "done": False, "reward": 0.0}
+@app.post("/step")
+def step(req: StepRequest):
+    obs, reward, done, info=env.step(req.action)
+    return {"observation":obs.model_dump(), "reward": reward, "done": done, "info": info}
+@app.get("/state")
+def state():
+    return env.state()

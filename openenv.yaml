@@ -1,0 +1,43 @@
+name: incident-response-agent
+version: "1.0.0"
+description: >
+  An SRE simulation environment for automated incident response. 
+  The agent must investigate logs, metrics, and database states 
+  to resolve system outages across three difficulty levels.
+  
+entrypoint: "uvicorn app:app --host 0.0.0.0 --port 7860"
+language: "python"
+
+tasks:
+  - id: "easy"
+    description: "Basic service restart with log investigation."
+  - id: "medium"
+    description: "CPU spike requiring metric checking and scaling."
+  - id: "hard"
+    description: "Complex outage with randomized root causes (DB vs CPU)."
+
+action_space:
+  description: "Discrete actions for system investigation and remediation"
+  actions:
+    - check_logs
+    - check_metrics
+    - check_db
+    - restart_service
+    - scale_service
+    - fix_db
+
+observation_space:
+  status: "string — running | down | degraded"
+  alert: "string — current alert message"
+  logs: "string | null — log output after check_logs"
+  logs_checked: "bool"
+  cpu: "int | null — CPU % after check_metrics"
+  metrics_checked: "bool"
+  db_status: "string | null — connected | down"
+  db_checked: "bool"
+
+tags:
+  - incident-response
+  - site-reliability-engineering
+  - llm-agent
+  - automation

@@ -1,2 +1,38 @@
-# incident-response-agent
-A specialized simulation environment for evaluating SRE-based LLM agents. Built on the OpenEnv standard, it uses FastAPI and Docker to provide a "gym" where AI must diagnose and fix cloud failures (Logs/CPU/DB). Features 3 complexity levels and strict Pydantic validation to prevent state-leaking.
+---
+title: Incident Response Agent
+emoji: 🚨
+colorFrom: red
+colorTo: yellow
+sdk: docker
+pinned: false
+app_port: 7860
+tags:
+  - openenv
+---
+
+# Incident Response Agent
+A step-based simulation environment where an AI agent acts as an SRE engineer,
+diagnosing and resolving real-world system incidents.
+
+## Action Space
+check_logs, check_metrics, check_db, restart_service, scale_service, fix_db
+
+## Observation Space
+status, alert, logs, logs_checked, cpu, metrics_checked, db_status, db_checked
+
+## Tasks
+- easy: Service is down, check logs then restart
+- medium: High CPU, check metrics then scale
+- hard: Unknown root cause (CPU or DB), agent must investigate and apply correct fix
+
+## Setup
+pip install openai pydantic fastapi uvicorn
+export HF_TOKEN=your_key
+export API_BASE_URL=https://api.groq.com/openai/v1
+export MODEL_NAME=llama-3.1-8b-instant
+python inference.py
+
+## Baseline Scores
+easy: 0.85 (partial if skips logs, full 1.0 if investigates first)
+medium: 0.85 (partial if skips metrics, full 1.0 if checks metrics first)
+hard: 0.70 (depends on correct root cause identification)
