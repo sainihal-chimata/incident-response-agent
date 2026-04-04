@@ -12,9 +12,10 @@ class StepRequest(BaseModel):
 def health():
     return {"status":"ok"}
 @app.post("/reset")
-def reset(req:ResetRequest):
-    obs=env.reset(req.task)
-    return {"observation":obs.model_dump(), "done": False, "reward": 0.0}
+def reset(req: ResetRequest = None):
+    task=req.task if req else "easy"
+    obs=env.reset(task)
+    return {"observation": obs.model_dump(), "done": False, "reward": 0.0}
 @app.post("/step")
 def step(req: StepRequest):
     obs, reward, done, info=env.step(req.action)
