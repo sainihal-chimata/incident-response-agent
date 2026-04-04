@@ -33,6 +33,6 @@ export MODEL_NAME=llama-3.1-8b-instant
 python inference.py
 
 ## Baseline Scores
-easy: 0.85 (partial if skips logs, full 1.0 if investigates first)
-medium: 0.85 (partial if skips metrics, full 1.0 if checks metrics first)
-hard: 0.70 (depends on correct root cause identification)
+easy: 1.0 (optimal) / 0.7 (skips investigation)
+medium: 1.0 (optimal) / 0.7 (skips investigation)
+hard: 1.0 (optimal) / 0.7 (correct fix, skips investigation)
