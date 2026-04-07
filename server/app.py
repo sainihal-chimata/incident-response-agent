@@ -12,19 +12,19 @@ class StepRequest(BaseModel):
 def health():
     return {"status":"ok"}
 @app.post("/reset")
-def reset(req: ResetRequest = None):
+def reset(req: ResetRequest=None):
     task=req.task if req else "easy"
     obs=env.reset(task)
-    return {"observation": obs.model_dump(), "done": False, "reward": 0.0}
+    return {"observation":obs.model_dump(), "done":False, "reward":0.01}
 @app.post("/step")
 def step(req: StepRequest):
     obs, reward, done, info=env.step(req.action)
-    return {"observation":obs.model_dump(), "reward": reward, "done": done, "info": info}
+    return {"observation":obs.model_dump(), "reward":reward, "done":done, "info":info}
 @app.get("/state")
 def state():
     return env.state()
 def main():
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=7860)
-if __name__ == "__main__":
+if __name__=="__main__":
     main()
