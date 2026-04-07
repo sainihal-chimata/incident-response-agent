@@ -3,12 +3,12 @@ from typing import Optional, Dict, Any
 class Observation(BaseModel):
     status: str
     alert: str
-    logs: Optional[str] = None
-    logs_checked: bool = False
-    cpu: Optional[int] = None
-    metrics_checked: bool = False
-    db_status: Optional[str] = None
-    db_checked: bool = False
+    logs: Optional[str]=None
+    logs_checked: bool=False
+    cpu: Optional[int]=None
+    metrics_checked: bool=False
+    db_status: Optional[str]=None
+    db_checked: bool=False
 import random
 class IncidentEnv:
     def state(self) -> Dict[str, Any]:
@@ -51,12 +51,12 @@ class IncidentEnv:
         obs_data={k:v for k,v in self._current_state.items() if k!="root_cause"}
         return Observation(**obs_data)
     def step(self,action):
-        reward=0
+        reward=0.01
         done=False
         if self.task=="easy":
             if action=="restart_service":
                 if self._current_state["logs_checked"]==True:
-                    reward=1.0
+                    reward=0.99
                     self._current_state["status"]="running"
                     self._current_state["alert"]="Env is running"
                     done=True
@@ -71,14 +71,14 @@ class IncidentEnv:
                     self._current_state["logs"]="These are the logs.."
                     self._current_state["logs_checked"]=True
                 else:
-                    reward=0
+                    reward=0.01
             else:
-                reward=-0.1
+                reward=0.01
                 done=False
         elif self.task=="medium":
             if action=="restart_service":
                 self._current_state["alert"]="High CPU usage detected"
-                reward=-0.1
+                reward=0.01
                 done=False
             elif action=="check_metrics":
                 if self._current_state["metrics_checked"]==False:
@@ -86,10 +86,10 @@ class IncidentEnv:
                     self._current_state["metrics_checked"]=True
                     self._current_state["cpu"]=95
                 else:
-                    reward=0
+                    reward=0.01
             elif action=="scale_service":
                 if self._current_state["cpu"]!=None:
-                    reward=1.0
+                    reward=0.99
                     self._current_state["cpu"]=40
                     done=True
                     self._current_state["alert"]="CPU normalized"
@@ -99,7 +99,7 @@ class IncidentEnv:
                     done=True
                     self._current_state["alert"]="CPU normalized"
             else:
-                reward=-0.1
+                reward=0.01
         elif self.task=="hard":
             if action=="check_logs":
                 if self._current_state["logs"]==None:
@@ -110,7 +110,7 @@ class IncidentEnv:
                     elif self._current_state["root_cause"]=="cpu":
                         self._current_state["logs"]="High CPU usage detected"
                 else:
-                    reward=0
+                    reward=0.01
             elif action=="check_metrics":
                 if self._current_state["metrics_checked"]==False:
                     reward=0.2
@@ -120,7 +120,7 @@ class IncidentEnv:
                     else:
                         self._current_state["cpu"]=30
                 else:
-                    reward=0
+                    reward=0.01
             elif action=="check_db":
                 if self._current_state["db_checked"]==False:
                     reward=0.2
@@ -130,11 +130,11 @@ class IncidentEnv:
                     else:
                         self._current_state["db_status"]="connected"
                 else:
-                    reward=0
+                    reward=0.01
             elif action=="scale_service":
                 if self._current_state["root_cause"]=="cpu":
                     if self._current_state["metrics_checked"]==True:
-                        reward=1.0
+                        reward=0.99
                     else:
                         reward=0.7
                     self._current_state["cpu"]=40
@@ -142,12 +142,12 @@ class IncidentEnv:
                     done=True
                     self._current_state["alert"]="Service restored"
                 elif self._current_state["root_cause"]=="db":
-                    reward=-0.1
+                    reward=0.01
                     done=False
             elif action=="fix_db":
                 if self._current_state["root_cause"]=="db":
                     if self._current_state["db_checked"]==True:
-                        reward=1.0
+                        reward=0.99
                     else:
                         reward=0.7
                     self._current_state["db_status"]="connected"
@@ -155,10 +155,10 @@ class IncidentEnv:
                     done=True
                     self._current_state["alert"]="Service restored"
                 else:
-                    reward=-0.1
+                    reward=0.01
                     done=False
             else:
-                reward=-0.1
+                reward=0.01
                 done=False
         obs_data={k:v for k,v in self._current_state.items() if k!="root_cause"}
         return Observation(**obs_data),reward,done, {}
