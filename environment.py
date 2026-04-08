@@ -16,13 +16,16 @@ class Observation(BaseModel):
 
 class IncidentEnv:
 
+    def __init__(self):
+        self._current_state = {}
+        self.done = False
+
     def state(self) -> Dict[str, Any]:
         return self._current_state
 
-    def __init__(self):
-        self._current_state = {}
-
     def reset(self, task):
+        self.done = False
+
         if task == "easy":
             self._current_state = {
                 "status": "down",
@@ -62,6 +65,11 @@ class IncidentEnv:
         return Observation(**obs_data)
 
     def step(self, action):
+
+        if self.done:
+            obs_data = {k: v for k, v in self._current_state.items() if k != "root_cause"}
+            return Observation(**obs_data), 0.01, True, {}
+
         reward = 0.02
         done = False
 
@@ -78,6 +86,7 @@ class IncidentEnv:
                 self._current_state["status"] = "running"
                 self._current_state["alert"] = "Env is running"
                 done = True
+                self.done = True
 
         elif self.task == "medium":
 
@@ -92,6 +101,7 @@ class IncidentEnv:
                 self._current_state["cpu"] = 40
                 self._current_state["alert"] = "CPU normalized"
                 done = True
+                self.done = True
 
         elif self.task == "hard":
 
@@ -128,6 +138,7 @@ class IncidentEnv:
                     self._current_state["status"] = "running"
                     self._current_state["alert"] = "Service restored"
                     done = True
+                    self.done = True
 
             elif action == "fix_db":
                 if self._current_state["root_cause"] == "db":
@@ -136,8 +147,8 @@ class IncidentEnv:
                     self._current_state["status"] = "running"
                     self._current_state["alert"] = "Service restored"
                     done = True
+                    self.done = True
 
-        # hard clamp to guarantee valid range
         reward = max(0.01, min(reward, 0.2))
 
         obs_data = {k: v for k, v in self._current_state.items() if k != "root_cause"}
