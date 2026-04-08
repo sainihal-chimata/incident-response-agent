@@ -54,8 +54,6 @@ Return ONLY the action name string. No prose, no explanation.
             return "check_db"
         if "database" in logs.lower():
             return "fix_db"
-        if hasattr(state,"metrics_checked") and not state.metrics_checked:
-            return "check_metrics"
         return "restart_service"
 if __name__=="__main__":
     env=IncidentEnv()
