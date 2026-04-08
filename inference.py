@@ -2,19 +2,19 @@ import os
 import sys
 from openai import OpenAI
 from environment import IncidentEnv
-api_key = os.getenv("HF_TOKEN") or os.getenv("GROQ_API_KEY")
-base_url = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
-model_name = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
+api_key=os.getenv("HF_TOKEN") or os.getenv("GROQ_API_KEY")
+base_url=os.getenv("API_BASE_URL","https://api.groq.com/openai/v1")
+model_name=os.getenv("MODEL_NAME","llama-3.1-8b-instant")
 if not api_key:
-    print("[WARN] No API key found, using rule-based fallback.", file=sys.stderr)
+    print("[WARN] No API key found, using rule-based fallback.",file=sys.stderr)
     api_key="dummy"
 client=OpenAI(
     api_key=api_key,
     base_url=base_url
 )
 def get_action_from_llm(state):
-    state_dict = state.model_dump()
-    prompt = f"""
+    state_dict=state.model_dump()
+    prompt=f"""
 You are an expert SRE (Site Reliability Engineer). 
 Your mission: Resolve the system incident in the fewest steps possible.
 CURRENT SYSTEM STATE:
@@ -33,34 +33,34 @@ Return ONLY the action name string. No prose, no explanation.
     try:
         response=client.chat.completions.create(
             model=model_name,
-            messages=[{"role": "user", "content": prompt}],
+            messages=[{"role":"user","content":prompt}],
             temperature=0,
             timeout=10
         )
         raw_action=response.choices[0].message.content.strip().lower()
-        valid_actions={"check_logs", "check_metrics", "check_db", "restart_service", "scale_service", "fix_db"}
+        valid_actions={"check_logs","check_metrics","check_db","restart_service","scale_service","fix_db"}
         for valid in valid_actions:
             if valid in raw_action:
                 return valid
         return "restart_service"
     except Exception as e:
-        print(f"[WARN] LLM call failed: {e}. Using fallback.", file=sys.stderr)
-        logs = state.logs or ""
+        print(f"[WARN] LLM call failed: {e}. Using fallback.",file=sys.stderr)
+        logs=state.logs or ""
         if not state.logs_checked:
             return "check_logs"
-        if hasattr(state, "metrics_checked") and not state.metrics_checked:
-            return "check_metrics"
-        if hasattr(state, "db_checked") and not state.db_checked and "database" in logs.lower():
+        if hasattr(state,"cpu") and state.cpu is not None and state.cpu>80:
+            return "scale_service"
+        if hasattr(state,"db_checked") and not state.db_checked and "database" in logs.lower():
             return "check_db"
         if "database" in logs.lower():
             return "fix_db"
-        if hasattr(state, "cpu") and state.cpu and state.cpu > 80:
-            return "scale_service"
+        if hasattr(state,"metrics_checked") and not state.metrics_checked:
+            return "check_metrics"
         return "restart_service"
-if __name__ == "__main__":
-    env = IncidentEnv()
-    for task in ["easy", "medium", "hard"]:
-        state = env.reset(task)
+if __name__=="__main__":
+    env=IncidentEnv()
+    for task in ["easy","medium","hard"]:
+        state=env.reset(task)
         print(f"[START] task={task} env=incident-response-agent model={model_name}")
         rewards=[]
         step=0
@@ -72,19 +72,19 @@ if __name__ == "__main__":
             if action in used_actions:
                 if not state.logs_checked:
                     action="check_logs"
-                elif hasattr(state, "metrics_checked") and not state.metrics_checked:
+                elif hasattr(state,"metrics_checked") and not state.metrics_checked:
                     action="check_metrics"
-                elif hasattr(state, "db_checked") and not state.db_checked:
+                elif hasattr(state,"db_checked") and not state.db_checked:
                     action="check_db"
                 else:
                     if "Database" in (state.logs or ""):
                         action="fix_db"
-                    elif (state.cpu or 0) > 80:
+                    elif (state.cpu or 0)>80:
                         action="scale_service"
                     else:
                         action="restart_service"
             used_actions.add(action)
-            state, reward, done, _=env.step(action)
+            state,reward,done,_=env.step(action)
             rewards.append(reward)
             print(f"[STEP] step={step} action={action} reward={reward:.2f} done={str(done).lower()} error=null")
             if done or step>=6:
