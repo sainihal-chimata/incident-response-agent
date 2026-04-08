@@ -6,8 +6,8 @@ api_key = os.getenv("HF_TOKEN") or os.getenv("GROQ_API_KEY")
 base_url = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
 model_name = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
 if not api_key:
-    print("[ERROR] No API key found. Set HF_TOKEN or GROQ_API_KEY.", file=sys.stderr)
-    sys.exit(1)
+    print("[WARN] No API key found, using rule-based fallback.", file=sys.stderr)
+    api_key="dummy"
 client=OpenAI(
     api_key=api_key,
     base_url=base_url
