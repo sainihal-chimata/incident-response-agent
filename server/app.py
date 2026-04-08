@@ -28,7 +28,7 @@ def reset(req: ResetRequest = None):
     return {
         "observation": obs.model_dump(),
         "done": False,
-        "reward": 0.01
+        "reward": 0.0   # FIXED: reset must NOT give reward
     }
 
 
@@ -36,7 +36,8 @@ def reset(req: ResetRequest = None):
 def step(req: StepRequest):
     obs, reward, done, info = env.step(req.action)
 
-    reward = max(0.01, min(reward, 0.99))
+    # strict clamp to keep within (0,1)
+    reward = max(0.01, min(reward, 0.2))
 
     return {
         "observation": obs.model_dump(),
