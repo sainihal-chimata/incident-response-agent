@@ -46,6 +46,8 @@ Return ONLY the action name string. No prose, no explanation.
     except Exception as e:
         print(f"[WARN] LLM call failed: {e}. Using fallback.",file=sys.stderr)
         logs=state.logs or ""
+        if hasattr(state,"metrics_checked") and not state.metrics_checked:
+            return "check_metrics"
         if not state.logs_checked:
             return "check_logs"
         if hasattr(state,"cpu") and state.cpu is not None and state.cpu>80:
