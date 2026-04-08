@@ -33,6 +33,6 @@ export MODEL_NAME=llama-3.1-8b-instant
 python inference.py
 
 ## Baseline Scores
-easy: 1.0 (optimal) / 0.7 (skips investigation)
-medium: 1.0 (optimal) / 0.7 (skips investigation)
-hard: 1.0 (optimal) / 0.7 (correct fix, skips investigation)
+easy: 0.99 (optimal) / 0.7 (skips investigation)
+medium: 0.99 (optimal) / 0.7 (skips investigation)
+hard: 0.99 (optimal) / 0.7 (correct fix, skips investigation)
