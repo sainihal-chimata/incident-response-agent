@@ -136,12 +136,5 @@ if __name__ == "__main__":
             if done or step >= 6:
                 break
 
-        total_reward = sum(rewards)
-
-        if total_reward <= 0:
-            total_reward = 0.01
-        elif total_reward >= 1:
-            total_reward = 0.99
-
         final_reward=rewards[-1]
         print(f"[END] success={str(done).lower()} steps={step} rewards={final_reward:.2f}")
