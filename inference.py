@@ -84,7 +84,7 @@ if __name__=="__main__":
                         action="fix_db"
                 elif not state.logs_checked:
                     action="check_logs"
-                elif hasattr(state,"metrics_checked") and not state.metrics_checked:
+                elif hasattr(state,"metrics_checked") and not state.metrics_checked and ("cpu" in (state.alert or "").lower() or "cpu" in (state.logs or "").lower()):
                     action="check_metrics"
                 else:
                     action="restart_service"
