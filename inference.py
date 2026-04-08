@@ -68,19 +68,19 @@ if __name__=="__main__":
             step+=1
             action=get_action_from_llm(state)
             if action in used_actions:
-                if not state.logs_checked:
+                if hasattr(state,"cpu") and state.cpu is not None and state.cpu>80:
+                    action="scale_service"
+                elif "Database" in (state.logs or ""):
+                    if hasattr(state,"db_checked") and not state.db_checked:
+                        action="check_db"
+                    else:
+                        action="fix_db"
+                elif not state.logs_checked:
                     action="check_logs"
                 elif hasattr(state,"metrics_checked") and not state.metrics_checked:
                     action="check_metrics"
-                elif hasattr(state,"db_checked") and not state.db_checked:
-                    action="check_db"
                 else:
-                    if "Database" in (state.logs or ""):
-                        action="fix_db"
-                    elif (state.cpu or 0)>80:
-                        action="scale_service"
-                    else:
-                        action="restart_service"
+                    action="restart_service"
             used_actions.add(action)
             state,reward,done,_=env.step(action)
             rewards.append(reward)
