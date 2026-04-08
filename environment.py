@@ -19,12 +19,14 @@ class IncidentEnv:
     def __init__(self):
         self._current_state = {}
         self.done = False
+        self.cumulative_reward = 0.0
 
     def state(self) -> Dict[str, Any]:
         return self._current_state
 
     def reset(self, task):
         self.done = False
+        self.cumulative_reward = 0.0
 
         if task == "easy":
             self._current_state = {
@@ -68,46 +70,35 @@ class IncidentEnv:
 
         if self.done:
             obs_data = {k: v for k, v in self._current_state.items() if k != "root_cause"}
-            return Observation(**obs_data), 0.01, True, {}
+            return Observation(**obs_data), 0.0, True, {}
 
-        reward = 0.02
-        done = False
+        self.done = False
 
         if self.task == "easy":
-
             if action == "check_logs":
                 if self._current_state["logs"] is None:
-                    reward = 0.1
                     self._current_state["logs"] = "These are the logs.."
                     self._current_state["logs_checked"] = True
 
             elif action == "restart_service":
-                reward = 0.2
                 self._current_state["status"] = "running"
                 self._current_state["alert"] = "Env is running"
-                done = True
                 self.done = True
 
         elif self.task == "medium":
-
             if action == "check_metrics":
                 if not self._current_state["metrics_checked"]:
-                    reward = 0.1
                     self._current_state["metrics_checked"] = True
                     self._current_state["cpu"] = 95
 
             elif action == "scale_service":
-                reward = 0.2
                 self._current_state["cpu"] = 40
                 self._current_state["alert"] = "CPU normalized"
-                done = True
                 self.done = True
 
         elif self.task == "hard":
-
             if action == "check_logs":
                 if self._current_state["logs"] is None:
-                    reward = 0.1
                     self._current_state["logs_checked"] = True
                     self._current_state["logs"] = (
                         "Database connection failed"
@@ -117,7 +108,6 @@ class IncidentEnv:
 
             elif action == "check_metrics":
                 if not self._current_state["metrics_checked"]:
-                    reward = 0.1
                     self._current_state["metrics_checked"] = True
                     self._current_state["cpu"] = (
                         95 if self._current_state["root_cause"] == "cpu" else 30
@@ -125,7 +115,6 @@ class IncidentEnv:
 
             elif action == "check_db":
                 if not self._current_state["db_checked"]:
-                    reward = 0.1
                     self._current_state["db_checked"] = True
                     self._current_state["db_status"] = (
                         "down" if self._current_state["root_cause"] == "db" else "connected"
@@ -133,24 +122,55 @@ class IncidentEnv:
 
             elif action == "scale_service":
                 if self._current_state["root_cause"] == "cpu":
-                    reward = 0.2
                     self._current_state["cpu"] = 40
                     self._current_state["status"] = "running"
                     self._current_state["alert"] = "Service restored"
-                    done = True
                     self.done = True
 
             elif action == "fix_db":
                 if self._current_state["root_cause"] == "db":
-                    reward = 0.2
                     self._current_state["db_status"] = "connected"
                     self._current_state["status"] = "running"
                     self._current_state["alert"] = "Service restored"
-                    done = True
                     self.done = True
 
-        reward = max(0.01, min(reward, 0.2))
+        target_score = 0.01
+        
+        if self.task == "easy":
+            if self._current_state.get("logs_checked"):
+                target_score += 0.20
+            if self.done:
+                target_score += 0.78
+                
+        elif self.task == "medium":
+            if self._current_state.get("metrics_checked"):
+                target_score += 0.20
+            if self.done:
+                target_score += 0.78
+                
+        elif self.task == "hard":
+            if self._current_state.get("logs_checked"):
+                target_score += 0.10
+            if self._current_state.get("metrics_checked"):
+                target_score += 0.10
+            if self._current_state.get("db_checked"):
+                target_score += 0.10
+            if self.done:
+                target_score += 0.68
+
+        step_reward = target_score - self.cumulative_reward
+
+        if step_reward <= 0.0:
+            step_reward = 0.01
+
+        if self.cumulative_reward + step_reward > 0.99:
+            step_reward = max(0.01, 0.99 - self.cumulative_reward)
+            if self.cumulative_reward >= 0.99:
+                step_reward = 0.001
+
+        self.cumulative_reward += step_reward
+        step_reward = round(step_reward, 4)
 
         obs_data = {k: v for k, v in self._current_state.items() if k != "root_cause"}
 
-        return Observation(**obs_data), reward, done, {}
+        return Observation(**obs_data), step_reward, self.done, {}
