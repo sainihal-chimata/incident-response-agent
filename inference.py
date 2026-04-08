@@ -20,11 +20,11 @@ Your mission: Resolve the system incident in the fewest steps possible.
 CURRENT SYSTEM STATE:
 {state_dict}
 CRITICAL OPERATIONAL RULES:
-1. INVESTIGATE FIRST: You must `check_logs` or `check_metrics` before taking any "fix" action.
-2. DATABASE PATH: If logs mention "Database", you MUST: `check_db` -> then `fix_db`.
-3. CAPACITY PATH: If logs or metrics show high CPU (>80), you MUST: `scale_service`.
+1. INVESTIGATE FIRST: You must check_logs or check_metrics before taking any fix action.
+2. DATABASE PATH: If logs mention Database, you MUST: check_db then fix_db.
+3. CAPACITY PATH: If logs or metrics show high CPU >80, you MUST: scale_service.
 4. FORBIDDEN: Never repeat an action that has already been recorded in the state.
-5. LAST RESORT: Only use `restart_service` if investigation yields no "fix" clues.
+5. LAST RESORT: Only use restart_service if investigation yields no fix clues.
 AVAILABLE ACTIONS:
 [check_logs, check_metrics, check_db, restart_service, scale_service, fix_db]
 RESPONSE FORMAT:
@@ -46,16 +46,19 @@ Return ONLY the action name string. No prose, no explanation.
     except Exception as e:
         print(f"[WARN] LLM call failed: {e}. Using fallback.",file=sys.stderr)
         logs=state.logs or ""
-        if hasattr(state,"metrics_checked") and not state.metrics_checked and state.logs_checked:
+        alert=state.alert or ""
+        if "cpu" in alert.lower() and not state.metrics_checked:
             return "check_metrics"
         if not state.logs_checked:
             return "check_logs"
         if hasattr(state,"cpu") and state.cpu is not None and state.cpu>80:
             return "scale_service"
-        if hasattr(state,"db_checked") and not state.db_checked and "database" in logs.lower():
-            return "check_db"
         if "database" in logs.lower():
+            if hasattr(state,"db_checked") and not state.db_checked:
+                return "check_db"
             return "fix_db"
+        if "cpu" in logs.lower() and hasattr(state,"metrics_checked") and not state.metrics_checked:
+            return "check_metrics"
         return "restart_service"
 if __name__=="__main__":
     env=IncidentEnv()
