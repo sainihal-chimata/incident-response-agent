@@ -56,12 +56,12 @@ class IncidentEnv:
         if self.task=="easy":
             if action=="restart_service":
                 if self._current_state["logs_checked"]==True:
-                    reward=0.75
+                    reward=0.35
                     self._current_state["status"]="running"
                     self._current_state["alert"]="Env is running"
                     done=True
                 else:
-                    reward=0.7
+                    reward=0.30
                     self._current_state["status"]="running"
                     self._current_state["alert"]="Env is running"
                     done=True
@@ -89,12 +89,12 @@ class IncidentEnv:
                     reward=0.01
             elif action=="scale_service":
                 if self._current_state["cpu"]!=None:
-                    reward=0.75
+                    reward=0.35
                     self._current_state["cpu"]=40
                     done=True
                     self._current_state["alert"]="CPU normalized"
                 else:
-                    reward=0.7
+                    reward=0.30
                     self._current_state["cpu"]=40
                     done=True
                     self._current_state["alert"]="CPU normalized"
@@ -134,9 +134,9 @@ class IncidentEnv:
             elif action=="scale_service":
                 if self._current_state["root_cause"]=="cpu":
                     if self._current_state["metrics_checked"]==True:
-                        reward=0.75
+                        reward=0.35
                     else:
-                        reward=0.7
+                        reward=0.30
                     self._current_state["cpu"]=40
                     self._current_state["status"]="running"
                     done=True
@@ -147,9 +147,9 @@ class IncidentEnv:
             elif action=="fix_db":
                 if self._current_state["root_cause"]=="db":
                     if self._current_state["db_checked"]==True:
-                        reward=0.75
+                        reward=0.35
                     else:
-                        reward=0.7
+                        reward=0.30
                     self._current_state["db_status"]="connected"
                     self._current_state["status"]="running"
                     done=True
