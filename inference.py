@@ -143,4 +143,5 @@ if __name__ == "__main__":
         elif total_reward >= 1:
             total_reward = 0.99
 
-        print(f"[END] success={str(done).lower()} steps={step} rewards={total_reward:.2f}")
+        final_reward=rewards[-1]
+        print(f"[END] success={str(done).lower()} steps={step} rewards={final_reward:.2f}")
