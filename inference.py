@@ -15,16 +15,17 @@ client=OpenAI(
 def get_action_from_llm(state):
     state_dict=state.model_dump()
     prompt=f"""
-You are an expert SRE (Site Reliability Engineer). 
+You are an expert SRE (Site Reliability Engineer).
 Your mission: Resolve the system incident in the fewest steps possible.
 CURRENT SYSTEM STATE:
 {state_dict}
-CRITICAL OPERATIONAL RULES:
-1. INVESTIGATE FIRST: You must check_logs or check_metrics before taking any fix action.
-2. DATABASE PATH: If logs mention Database, you MUST: check_db then fix_db.
-3. CAPACITY PATH: If logs or metrics show high CPU >80, you MUST: scale_service.
-4. FORBIDDEN: Never repeat an action that has already been recorded in the state.
-5. LAST RESORT: Only use restart_service if investigation yields no fix clues.
+DECISION RULES - follow exactly:
+- If status=down and logs_checked=False: return check_logs
+- If alert contains "CPU" and metrics_checked=False: return check_metrics  
+- If cpu>80: return scale_service
+- If logs contain "Database" and db_checked=False: return check_db
+- If logs contain "Database" and db_checked=True: return fix_db
+- If logs_checked=True and no CPU or DB issue found: return restart_service
 AVAILABLE ACTIONS:
 [check_logs, check_metrics, check_db, restart_service, scale_service, fix_db]
 RESPONSE FORMAT:
