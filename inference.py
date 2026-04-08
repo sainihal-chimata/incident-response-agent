@@ -89,5 +89,5 @@ if __name__ == "__main__":
             print(f"[STEP] step={step} action={action} reward={reward:.2f} done={str(done).lower()} error=null")
             if done or step>=6:
                 break
-        rewards_str=",".join(f"{r:.2f}" for r in rewards)
-        print(f"[END] success={str(done).lower()} steps={step} rewards={rewards_str}")
+        final_reward=rewards[-1]
+        print(f"[END] success={str(done).lower()} steps={step} rewards={final_reward:.2f}")
