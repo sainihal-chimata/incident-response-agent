@@ -161,12 +161,10 @@ class IncidentEnv:
         step_reward = target_score - self.cumulative_reward
 
         if step_reward <= 0.0:
-            step_reward = 0.01
+            step_reward = 0.0
 
         if self.cumulative_reward + step_reward > 0.99:
-            step_reward = max(0.01, 0.99 - self.cumulative_reward)
-            if self.cumulative_reward >= 0.99:
-                step_reward = 0.001
+            step_reward = max(0.0, 0.99 - self.cumulative_reward)
 
         self.cumulative_reward += step_reward
         step_reward = round(step_reward, 4)
