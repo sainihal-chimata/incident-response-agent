@@ -134,19 +134,19 @@ class IncidentEnv:
                     self._current_state["alert"] = "Service restored"
                     self.done = True
 
-        target_score = 0.01
+        target_score = 0.05
         
         if self.task == "easy":
             if self._current_state.get("logs_checked"):
                 target_score += 0.20
             if self.done:
-                target_score += 0.78
+                target_score += 0.70
                 
         elif self.task == "medium":
             if self._current_state.get("metrics_checked"):
                 target_score += 0.20
             if self.done:
-                target_score += 0.78
+                target_score += 0.70
                 
         elif self.task == "hard":
             if self._current_state.get("logs_checked"):
@@ -156,15 +156,15 @@ class IncidentEnv:
             if self._current_state.get("db_checked"):
                 target_score += 0.10
             if self.done:
-                target_score += 0.68
+                target_score += 0.60
 
         step_reward = target_score - self.cumulative_reward
 
         if step_reward <= 0.0:
             step_reward = 0.0
 
-        if self.cumulative_reward + step_reward > 0.99:
-            step_reward = max(0.0, 0.99 - self.cumulative_reward)
+        if self.cumulative_reward + step_reward > 0.95:
+            step_reward = max(0.0, 0.95 - self.cumulative_reward)
 
         self.cumulative_reward += step_reward
         step_reward = round(step_reward, 4)
@@ -172,3 +172,4 @@ class IncidentEnv:
         obs_data = {k: v for k, v in self._current_state.items() if k != "root_cause"}
 
         return Observation(**obs_data), step_reward, self.done, {}
+
