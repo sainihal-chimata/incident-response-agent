@@ -28,7 +28,7 @@ def reset(req: ResetRequest = None):
     return {
         "observation": obs.model_dump(),
         "done": False,
-        "reward": 0.001
+        "reward": 0.0
     }
 
 
