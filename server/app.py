@@ -49,6 +49,15 @@ def state():
     return env.state()
 
 
+@app.get("/tasks")
+def tasks():
+    return [
+        {"id": "easy", "description": "Basic service restart with log investigation."},
+        {"id": "medium", "description": "CPU spike requiring metric checking and scaling."},
+        {"id": "hard", "description": "Complex outage with randomized root causes (DB vs CPU)."}
+    ]
+
+
 def main():
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=7860)
@@ -56,4 +65,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
