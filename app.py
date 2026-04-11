@@ -28,7 +28,7 @@ def reset(req: ResetRequest = None):
     return {
         "observation": obs.model_dump(),
         "done": False,
-        "reward": 0.0
+        "reward": 0.01
     }
 
 
@@ -56,3 +56,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
