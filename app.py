@@ -58,6 +58,29 @@ def tasks():
     ]
 
 
+@app.get("/schema")
+def schema():
+    return {
+        "action_space": {
+            "type": "discrete",
+            "actions": ["check_logs", "check_metrics", "check_db", "restart_service", "scale_service", "fix_db"]
+        },
+        "observation_space": {
+            "type": "object",
+            "properties": {
+                "status": {"type": "string"},
+                "alert": {"type": "string"},
+                "logs": {"type": "string", "nullable": True},
+                "logs_checked": {"type": "boolean"},
+                "cpu": {"type": "integer", "nullable": True},
+                "metrics_checked": {"type": "boolean"},
+                "db_status": {"type": "string", "nullable": True},
+                "db_checked": {"type": "boolean"}
+            }
+        }
+    }
+
+
 def main():
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=7860)
@@ -65,4 +88,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
