@@ -137,4 +137,7 @@ if __name__ == "__main__":
                 break
 
         final_reward = sum(rewards)
-        print(f"[END] success={str(done).lower()} steps={step} rewards={final_reward:.2f}")
+        final_score = round(min(max(final_reward, 0.01), 0.99), 4)
+        rewards_str = ",".join([f"{r:.2f}" for r in rewards])
+        print(f"[END] task={task} success={str(done).lower()} steps={step} score={final_score:.2f} rewards={rewards_str}")
+
