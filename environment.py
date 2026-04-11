@@ -158,18 +158,22 @@ class IncidentEnv:
             if self.done:
                 target_score += 0.60
 
+        def safe_reward(raw: float) -> float:
+            return round(min(max(float(raw), 0.01), 0.99), 4)
+            
         step_reward = target_score - self.cumulative_reward
 
         if step_reward <= 0.0:
-            step_reward = 0.0
+            step_reward = 0.01
 
         if self.cumulative_reward + step_reward > 0.95:
-            step_reward = max(0.0, 0.95 - self.cumulative_reward)
+            step_reward = max(0.01, 0.95 - self.cumulative_reward)
 
         self.cumulative_reward += step_reward
-        step_reward = round(step_reward, 4)
+        final_clamped_reward = safe_reward(step_reward)
 
         obs_data = {k: v for k, v in self._current_state.items() if k != "root_cause"}
 
-        return Observation(**obs_data), step_reward, self.done, {}
+        return Observation(**obs_data), final_clamped_reward, self.done, {}
+
 
