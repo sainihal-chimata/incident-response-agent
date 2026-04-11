@@ -52,9 +52,9 @@ def state():
 @app.get("/tasks")
 def tasks():
     return [
-        {"id": "easy", "description": "Basic service restart with log investigation."},
-        {"id": "medium", "description": "CPU spike requiring metric checking and scaling."},
-        {"id": "hard", "description": "Complex outage with randomized root causes (DB vs CPU)."}
+        {"id": "easy", "grader": "server.graders.grade_easy", "description": "Basic service restart with log investigation."},
+        {"id": "medium", "grader": "server.graders.grade_medium", "description": "CPU spike requiring metric checking and scaling."},
+        {"id": "hard", "grader": "server.graders.grade_hard", "description": "Complex outage with randomized root causes (DB vs CPU)."}
     ]
 
 
