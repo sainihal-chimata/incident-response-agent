@@ -171,6 +171,13 @@ class IncidentEnv:
 
         obs_data = {k: v for k, v in self._current_state.items() if k != "root_cause"}
 
-        return Observation(**obs_data), step_reward, self.done, {}
+        info_dict = {
+            "score": round(self.cumulative_reward, 4),
+            "task_score": round(self.cumulative_reward, 4),
+            "is_success": self.done
+        }
+
+        return Observation(**obs_data), step_reward, self.done, info_dict
+
 
 
