@@ -12,10 +12,13 @@ language: python
 tasks:
   - id: easy
     description: Basic service restart with log investigation.
+    grader: server.graders.grade_easy
   - id: medium
     description: CPU spike requiring metric checking and scaling.
+    grader: server.graders.grade_medium
   - id: hard
     description: Complex outage with randomized root causes (DB vs CPU).
+    grader: server.graders.grade_hard
 
 action_space:
   type: discrete
@@ -55,3 +58,4 @@ tags:
   - site-reliability-engineering
   - llm-agent
   - automation
+
